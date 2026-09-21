@@ -1,6 +1,7 @@
 package com.deboutpatriotes.api.blog;
 
 import java.time.Instant;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -42,6 +43,20 @@ public interface PostRepository extends JpaRepository<Post, Long> {
               and (:q is null or lower(p.title) like lower(concat('%', :q, '%')))
             """)
     Page<Post> search(@Param("status") PostStatus status, @Param("q") String q, Pageable pageable);
+
+    /**
+     * Titres des articles qui utilisent cette image : en couverture, ou insérée dans le corps
+     * Markdown. Sert à ne pas supprimer d'ImageKit une image encore affichée quelque part.
+     */
+    @Query("""
+            select p.title from Post p
+            where (:fileId is not null and p.coverFileId = :fileId)
+               or (:url is not null and p.content like concat('%', :url, '%'))
+            """)
+    List<String> findTitlesUsingImage(@Param("fileId") String fileId, @Param("url") String url);
+
+    @Query("select p.coverFileId from Post p where p.coverFileId in :fileIds")
+    List<String> findCoverFileIdsIn(@Param("fileIds") Collection<String> fileIds);
 
     boolean existsBySlug(String slug);
 
