@@ -94,13 +94,20 @@ class MediaLibraryTests {
         candidate.setPosition("Député");
         candidate.setConstituency("Nord");
         candidate.setParty("DEBOUT PATRIOTES");
-        candidate.setProfession("Agronome");
+        candidate.getProfessions().add("Agronome");
+        candidate.getProfessions().add("Enseignant");
         candidate.setBirthplace("Cap-Haïtien");
         candidate.setPhotoUrl("https://ik.imagekit.io/dp/candidats/jbp.jpg");
         candidate.setPhotoFileId("file-portrait");
+        candidate.setCoverUrl("https://ik.imagekit.io/dp/candidats/jbp-couverture.jpg");
+        candidate.setCoverFileId("file-couverture");
         candidates.save(candidate);
 
         assertThat(usedBy("file-portrait", null)).contains("Jean-Baptiste Pierre");
+        // La couverture compte elle aussi comme une image utilisée.
+        assertThat(usedBy("file-couverture", null)).contains("Jean-Baptiste Pierre");
+        assertThat(referenced(Set.of("file-portrait", "file-couverture")))
+                .containsExactlyInAnyOrder("file-portrait", "file-couverture");
     }
 
     @Test

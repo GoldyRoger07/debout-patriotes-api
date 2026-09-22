@@ -41,30 +41,31 @@ public class Candidate {
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false)
     private String subtitle;
 
+    /** Portrait affiché sur la fiche, à côté de la biographie. */
     @Column(name = "photo_url")
     private String photoUrl;
 
-    /** Identifiant ImageKit de la photo, pour la supprimer quand elle est remplacée. */
+    /** Identifiant ImageKit du portrait, pour le supprimer quand il est remplacé. */
     @Column(name = "photo_file_id")
     private String photoFileId;
 
+    /** Visuel de couverture des cartes (accueil et liste complète des candidats). */
+    @Column(name = "cover_url")
+    private String coverUrl;
+
+    /** Identifiant ImageKit de la couverture, pour la supprimer quand elle est remplacée. */
+    @Column(name = "cover_file_id")
+    private String coverFileId;
+
     /** Poste brigué. */
-    @Column(nullable = false)
     private String position;
 
-    @Column(nullable = false)
     private String constituency;
 
-    @Column(nullable = false)
     private String party;
 
-    @Column(nullable = false)
-    private String profession;
-
-    @Column(nullable = false)
     private String birthplace;
 
     private String quote;
@@ -79,6 +80,13 @@ public class Candidate {
 
     @Column(nullable = false)
     private boolean published = true;
+
+    @ElementCollection
+    @CollectionTable(name = "candidate_profession", joinColumns = @JoinColumn(name = "candidate_id"))
+    @OrderColumn(name = "sort_order")
+    @Column(name = "label", nullable = false)
+    @BatchSize(size = 50)
+    private List<String> professions = new ArrayList<>();
 
     @ElementCollection
     @CollectionTable(name = "candidate_bio", joinColumns = @JoinColumn(name = "candidate_id"))

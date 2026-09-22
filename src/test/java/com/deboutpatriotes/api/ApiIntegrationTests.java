@@ -63,7 +63,7 @@ class ApiIntegrationTests {
     void candidateIsOnlyPublicOncePublished() throws Exception {
         String body = """
                 {"name":"Marie-Ève Joseph","subtitle":"Candidate au Sénat","position":"Sénatrice",
-                 "constituency":"Ouest","party":"DEBOUT PATRIOTES","profession":"Avocate","birthplace":"Jacmel",
+                 "constituency":"Ouest","party":"DEBOUT PATRIOTES","professions":["Avocate","Enseignante"],"birthplace":"Jacmel",
                  "bio":["Premier paragraphe."],"priorities":[{"title":"Justice","desc":"Réformer.","icon":"pi-shield"}],
                  "career":[{"period":"2020","title":"Avocate"}],"education":["Droit"],
                  "contact":{"email":"mej@example.org"},"published":false}
@@ -81,6 +81,8 @@ class ApiIntegrationTests {
 
         assertThat(mvc.get().uri("/api/candidates/marie-eve-joseph")).hasStatusOk().bodyJson()
                 .extractingPath("$.priorities[0].desc").isEqualTo("Réformer.");
+        assertThat(mvc.get().uri("/api/candidates/marie-eve-joseph")).hasStatusOk().bodyJson()
+                .extractingPath("$.professions").isEqualTo(java.util.List.of("Avocate", "Enseignante"));
 
         // Même slug pour un second candidat : conflit.
         assertThat(mvc.post().uri("/api/admin/candidates").header(HttpHeaders.AUTHORIZATION, bearer)

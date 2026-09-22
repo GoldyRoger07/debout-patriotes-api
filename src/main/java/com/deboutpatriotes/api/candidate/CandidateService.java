@@ -61,9 +61,13 @@ public class CandidateService {
     public CandidateResponse update(Long id, CandidateRequest request) {
         Candidate candidate = find(id);
         String previousPhoto = candidate.getPhotoFileId();
+        String previousCover = candidate.getCoverFileId();
         apply(candidate, request);
         if (previousPhoto != null && !Objects.equals(previousPhoto, candidate.getPhotoFileId())) {
             imageKit.deleteAfterCommit(previousPhoto);
+        }
+        if (previousCover != null && !Objects.equals(previousCover, candidate.getCoverFileId())) {
+            imageKit.deleteAfterCommit(previousCover);
         }
         return toResponse(candidates.save(candidate));
     }
@@ -73,6 +77,7 @@ public class CandidateService {
         Candidate candidate = find(id);
         candidates.delete(candidate);
         imageKit.deleteAfterCommit(candidate.getPhotoFileId());
+        imageKit.deleteAfterCommit(candidate.getCoverFileId());
     }
 
     /** Réordonne les candidats selon la liste d'identifiants fournie (ordre d'affichage du site). */
@@ -101,14 +106,15 @@ public class CandidateService {
         }
         c.setSlug(slug);
         c.setName(r.name().trim());
-        c.setSubtitle(r.subtitle().trim());
+        c.setSubtitle(blankToNull(r.subtitle()));
         c.setPhotoUrl(blankToNull(r.photo()));
         c.setPhotoFileId(c.getPhotoUrl() == null ? null : blankToNull(r.photoFileId()));
-        c.setPosition(r.position().trim());
-        c.setConstituency(r.constituency().trim());
-        c.setParty(r.party().trim());
-        c.setProfession(r.profession().trim());
-        c.setBirthplace(r.birthplace().trim());
+        c.setCoverUrl(blankToNull(r.cover()));
+        c.setCoverFileId(c.getCoverUrl() == null ? null : blankToNull(r.coverFileId()));
+        c.setPosition(blankToNull(r.position()));
+        c.setConstituency(blankToNull(r.constituency()));
+        c.setParty(blankToNull(r.party()));
+        c.setBirthplace(blankToNull(r.birthplace()));
         c.setQuote(blankToNull(r.quote()));
         if (r.published() != null) {
             c.setPublished(r.published());
@@ -121,8 +127,10 @@ public class CandidateService {
         c.setInstagram(contact == null ? null : blankToNull(contact.instagram()));
 
         // Les collections sont vidées puis remplies (et non réaffectées) pour que Hibernate suive les changements.
+        c.getProfessions().clear();
+        c.getProfessions().addAll(orEmpty(r.professions()).stream().map(String::trim).toList());
         c.getBio().clear();
-        c.getBio().addAll(r.bio().stream().map(String::trim).toList());
+        c.getBio().addAll(orEmpty(r.bio()).stream().map(String::trim).toList());
         c.getPriorities().clear();
         c.getPriorities().addAll(orEmpty(r.priorities()).stream()
                 .map(p -> new Candidate.Priority(p.title().trim(), p.desc().trim(), blankToNull(p.icon())))
@@ -138,8 +146,10 @@ public class CandidateService {
     private CandidateResponse toResponse(Candidate c) {
         boolean hasContact = c.getEmail() != null || c.getFacebook() != null || c.getX() != null || c.getInstagram() != null;
         return new CandidateResponse(
-                c.getId(), c.getSlug(), c.getName(), c.getSubtitle(), c.getPhotoUrl(), c.getPhotoFileId(),
-                c.getPosition(), c.getConstituency(), c.getParty(), c.getProfession(), c.getBirthplace(), c.getQuote(),
+                c.getId(), c.getSlug(), c.getName(), c.getSubtitle(),
+                c.getPhotoUrl(), c.getPhotoFileId(), c.getCoverUrl(), c.getCoverFileId(),
+                c.getPosition(), c.getConstituency(), c.getParty(), List.copyOf(c.getProfessions()),
+                c.getBirthplace(), c.getQuote(),
                 List.copyOf(c.getBio()),
                 c.getPriorities().stream().map(p -> new PriorityDto(p.getTitle(), p.getDescription(), p.getIcon())).toList(),
                 c.getCareer().stream().map(e -> new CareerDto(e.getPeriod(), e.getTitle(), e.getDescription())).toList(),

@@ -8,7 +8,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
@@ -48,10 +47,12 @@ public final class CandidateDtos {
             String subtitle,
             String photo,
             String photoFileId,
+            String cover,
+            String coverFileId,
             String position,
             String constituency,
             String party,
-            String profession,
+            List<String> professions,
             String birthplace,
             String quote,
             List<String> bio,
@@ -64,19 +65,24 @@ public final class CandidateDtos {
             Instant updatedAt) {
     }
 
+    /**
+     * Seul le nom est exigé : une fiche n'affiche que les informations réellement saisies.
+     */
     public record CandidateRequest(
             @Size(max = 190) String slug,
             @NotBlank @Size(max = 160) String name,
-            @NotBlank @Size(max = 255) String subtitle,
+            @Size(max = 255) String subtitle,
             @Size(max = 500) String photo,
             @Size(max = 100) String photoFileId,
-            @NotBlank @Size(max = 160) String position,
-            @NotBlank @Size(max = 160) String constituency,
-            @NotBlank @Size(max = 160) String party,
-            @NotBlank @Size(max = 160) String profession,
-            @NotBlank @Size(max = 160) String birthplace,
+            @Size(max = 500) String cover,
+            @Size(max = 100) String coverFileId,
+            @Size(max = 160) String position,
+            @Size(max = 160) String constituency,
+            @Size(max = 160) String party,
+            List<@NotBlank @Size(max = 160) String> professions,
+            @Size(max = 160) String birthplace,
             @Size(max = 500) String quote,
-            @NotEmpty(message = "Au moins un paragraphe de biographie") List<@NotBlank String> bio,
+            List<@NotBlank String> bio,
             List<@Valid PriorityDto> priorities,
             List<@Valid CareerDto> career,
             List<@NotBlank @Size(max = 500) String> education,
