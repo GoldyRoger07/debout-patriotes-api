@@ -97,6 +97,7 @@ public class PostService {
         post.setContent(r.content());
         post.setCoverUrl(blankToNull(r.cover()));
         post.setCoverFileId(post.getCoverUrl() == null ? null : blankToNull(r.coverFileId()));
+        post.setCoverFocus(post.getCoverUrl() == null ? null : r.coverFocus());
         post.setCategory(r.categoryId() == null ? null : categories.find(r.categoryId()));
         post.setStatus(r.status());
         if (r.publishedAt() != null) {

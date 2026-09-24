@@ -109,8 +109,10 @@ public class CandidateService {
         c.setSubtitle(blankToNull(r.subtitle()));
         c.setPhotoUrl(blankToNull(r.photo()));
         c.setPhotoFileId(c.getPhotoUrl() == null ? null : blankToNull(r.photoFileId()));
+        c.setPhotoFocus(c.getPhotoUrl() == null ? null : r.photoFocus());
         c.setCoverUrl(blankToNull(r.cover()));
         c.setCoverFileId(c.getCoverUrl() == null ? null : blankToNull(r.coverFileId()));
+        c.setCoverFocus(c.getCoverUrl() == null ? null : r.coverFocus());
         c.setPosition(blankToNull(r.position()));
         c.setConstituency(blankToNull(r.constituency()));
         c.setParty(blankToNull(r.party()));
@@ -147,7 +149,8 @@ public class CandidateService {
         boolean hasContact = c.getEmail() != null || c.getFacebook() != null || c.getX() != null || c.getInstagram() != null;
         return new CandidateResponse(
                 c.getId(), c.getSlug(), c.getName(), c.getSubtitle(),
-                c.getPhotoUrl(), c.getPhotoFileId(), c.getCoverUrl(), c.getCoverFileId(),
+                c.getPhotoUrl(), c.getPhotoFileId(), c.getPhotoFocus(),
+                c.getCoverUrl(), c.getCoverFileId(), c.getCoverFocus(),
                 c.getPosition(), c.getConstituency(), c.getParty(), List.copyOf(c.getProfessions()),
                 c.getBirthplace(), c.getQuote(),
                 List.copyOf(c.getBio()),

@@ -6,11 +6,15 @@ import java.util.List;
 
 import org.hibernate.annotations.BatchSize;
 
+import com.deboutpatriotes.api.media.ImageFocus;
+
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -51,6 +55,11 @@ public class Candidate {
     @Column(name = "photo_file_id")
     private String photoFileId;
 
+    /** Cadrage du portrait dans les emplacements du site (fiche et vignettes). */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "photo_focus", length = 20)
+    private ImageFocus photoFocus;
+
     /** Visuel de couverture des cartes (accueil et liste complète des candidats). */
     @Column(name = "cover_url")
     private String coverUrl;
@@ -58,6 +67,11 @@ public class Candidate {
     /** Identifiant ImageKit de la couverture, pour la supprimer quand elle est remplacée. */
     @Column(name = "cover_file_id")
     private String coverFileId;
+
+    /** Cadrage de la couverture dans les cartes du site. */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "cover_focus", length = 20)
+    private ImageFocus coverFocus;
 
     /** Poste brigué. */
     private String position;

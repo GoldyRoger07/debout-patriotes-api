@@ -18,6 +18,8 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
+import com.deboutpatriotes.api.media.ImageFocus;
+
 /** Article du blog, affiché sur `/actualites/<slug>`. Le corps est rédigé en Markdown. */
 @Entity
 @Table(name = "post")
@@ -46,6 +48,11 @@ public class Post {
 
     @Column(name = "cover_file_id")
     private String coverFileId;
+
+    /** Cadrage de la couverture dans les emplacements du site (cartes et en-tête d'article). */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "cover_focus", length = 20)
+    private ImageFocus coverFocus;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")

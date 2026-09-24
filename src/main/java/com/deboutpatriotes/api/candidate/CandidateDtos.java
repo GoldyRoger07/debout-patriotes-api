@@ -3,6 +3,7 @@ package com.deboutpatriotes.api.candidate;
 import java.time.Instant;
 import java.util.List;
 
+import com.deboutpatriotes.api.media.ImageFocus;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import jakarta.validation.Valid;
@@ -47,8 +48,10 @@ public final class CandidateDtos {
             String subtitle,
             String photo,
             String photoFileId,
+            ImageFocus photoFocus,
             String cover,
             String coverFileId,
+            ImageFocus coverFocus,
             String position,
             String constituency,
             String party,
@@ -74,8 +77,12 @@ public final class CandidateDtos {
             @Size(max = 255) String subtitle,
             @Size(max = 500) String photo,
             @Size(max = 100) String photoFileId,
+            /** Cadrage du portrait ; vide = le cadrage par défaut de l'emplacement. */
+            ImageFocus photoFocus,
             @Size(max = 500) String cover,
             @Size(max = 100) String coverFileId,
+            /** Cadrage de la couverture ; vide = le cadrage par défaut de l'emplacement. */
+            ImageFocus coverFocus,
             @Size(max = 160) String position,
             @Size(max = 160) String constituency,
             @Size(max = 160) String party,
