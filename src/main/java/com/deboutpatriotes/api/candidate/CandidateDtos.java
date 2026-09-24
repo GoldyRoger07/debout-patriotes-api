@@ -8,6 +8,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -98,5 +100,13 @@ public final class CandidateDtos {
     }
 
     public record OrderRequest(@NotNull List<Long> ids) {
+    }
+
+    /** Proportion d'une photo, largeur sur hauteur : `{"width":4,"height":5}` pour du 4/5. */
+    public record Ratio(@Min(1) @Max(32) int width, @Min(1) @Max(32) int height) {
+    }
+
+    /** Proportion des photos des cartes, par emplacement : défilement de l'accueil et page « Nos candidats ». */
+    public record CardFormats(@NotNull @Valid Ratio home, @NotNull @Valid Ratio list) {
     }
 }

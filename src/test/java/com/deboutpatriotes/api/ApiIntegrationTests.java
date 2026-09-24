@@ -53,6 +53,26 @@ class ApiIntegrationTests {
     }
 
     @Test
+    void cardFormatsAreSetInTheBackOfficeAndReadPublicly() {
+        assertThat(mvc.get().uri("/api/candidates/card-formats")).hasStatusOk().bodyJson()
+                .extractingPath("$.home.width").isEqualTo(4);
+
+        assertThat(mvc.put().uri("/api/admin/candidates/card-formats").header(HttpHeaders.AUTHORIZATION, bearer)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"home\":{\"width\":1,\"height\":1},\"list\":{\"width\":3,\"height\":4}}"))
+                .hasStatusOk();
+        assertThat(mvc.get().uri("/api/candidates/card-formats")).hasStatusOk().bodyJson()
+                .extractingPath("$.list.height").isEqualTo(4);
+
+        assertThat(mvc.put().uri("/api/admin/candidates/card-formats").header(HttpHeaders.AUTHORIZATION, bearer)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"home\":{\"width\":0,\"height\":1},\"list\":{\"width\":3,\"height\":4}}"))
+                .hasStatus(HttpStatus.BAD_REQUEST);
+        assertThat(mvc.put().uri("/api/admin/candidates/card-formats").contentType(MediaType.APPLICATION_JSON)
+                .content("{}")).hasStatus(HttpStatus.UNAUTHORIZED);
+    }
+
+    @Test
     void wrongPasswordIsRejected() {
         assertThat(mvc.post().uri("/api/auth/login").contentType(MediaType.APPLICATION_JSON)
                 .content("{\"email\":\"admin@test.local\",\"password\":\"wrong-password\"}"))

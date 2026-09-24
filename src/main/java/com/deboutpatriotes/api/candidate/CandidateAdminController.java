@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.deboutpatriotes.api.candidate.CandidateDtos.CandidateRequest;
 import com.deboutpatriotes.api.candidate.CandidateDtos.CandidateResponse;
+import com.deboutpatriotes.api.candidate.CandidateDtos.CardFormats;
 import com.deboutpatriotes.api.candidate.CandidateDtos.OrderRequest;
 
 import jakarta.validation.Valid;
@@ -24,14 +25,26 @@ import jakarta.validation.Valid;
 class CandidateAdminController {
 
     private final CandidateService service;
+    private final CandidateCardFormatService cardFormats;
 
-    CandidateAdminController(CandidateService service) {
+    CandidateAdminController(CandidateService service, CandidateCardFormatService cardFormats) {
         this.service = service;
+        this.cardFormats = cardFormats;
     }
 
     @GetMapping
     List<CandidateResponse> list() {
         return service.listAll();
+    }
+
+    @GetMapping("/card-formats")
+    CardFormats cardFormats() {
+        return cardFormats.get();
+    }
+
+    @PutMapping("/card-formats")
+    CardFormats updateCardFormats(@Valid @RequestBody CardFormats request) {
+        return cardFormats.update(request);
     }
 
     @GetMapping("/{id}")
