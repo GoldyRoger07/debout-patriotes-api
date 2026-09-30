@@ -31,6 +31,7 @@ class PublicCacheConfig implements WebMvcConfigurer {
                 }
                 return true;
             }
-        }).addPathPatterns("/api/candidates/**", "/api/posts/**", "/api/categories/**");
+        }).addPathPatterns("/api/candidates/**", "/api/posts/**", "/api/categories/**", "/api/albums/**",
+                "/api/events/**");
     }
 }

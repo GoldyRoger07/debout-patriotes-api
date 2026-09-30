@@ -50,13 +50,16 @@ public interface PostRepository extends JpaRepository<Post, Long> {
      */
     @Query("""
             select p.title from Post p
-            where (:fileId is not null and p.coverFileId = :fileId)
+            where (:fileId is not null and (p.coverFileId = :fileId or p.videoFileId = :fileId))
                or (:url is not null and p.content like concat('%', :url, '%'))
             """)
     List<String> findTitlesUsingImage(@Param("fileId") String fileId, @Param("url") String url);
 
     @Query("select p.coverFileId from Post p where p.coverFileId in :fileIds")
     List<String> findCoverFileIdsIn(@Param("fileIds") Collection<String> fileIds);
+
+    @Query("select p.videoFileId from Post p where p.videoFileId in :fileIds")
+    List<String> findVideoFileIdsIn(@Param("fileIds") Collection<String> fileIds);
 
     boolean existsBySlug(String slug);
 

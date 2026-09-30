@@ -67,9 +67,13 @@ public class PostService {
     public PostResponse update(Long id, PostRequest request) {
         Post post = find(id);
         String previousCover = post.getCoverFileId();
+        String previousVideo = post.getVideoFileId();
         apply(post, request);
         if (previousCover != null && !Objects.equals(previousCover, post.getCoverFileId())) {
             imageKit.deleteAfterCommit(previousCover);
+        }
+        if (previousVideo != null && !Objects.equals(previousVideo, post.getVideoFileId())) {
+            imageKit.deleteAfterCommit(previousVideo);
         }
         return PostResponse.of(posts.save(post));
     }
@@ -79,6 +83,7 @@ public class PostService {
         Post post = find(id);
         posts.delete(post);
         imageKit.deleteAfterCommit(post.getCoverFileId());
+        imageKit.deleteAfterCommit(post.getVideoFileId());
     }
 
     private Post find(Long id) {
@@ -98,6 +103,8 @@ public class PostService {
         post.setCoverUrl(blankToNull(r.cover()));
         post.setCoverFileId(post.getCoverUrl() == null ? null : blankToNull(r.coverFileId()));
         post.setCoverFocus(post.getCoverUrl() == null ? null : r.coverFocus());
+        post.setVideoUrl(blankToNull(r.video()));
+        post.setVideoFileId(post.getVideoUrl() == null ? null : blankToNull(r.videoFileId()));
         post.setCategory(r.categoryId() == null ? null : categories.find(r.categoryId()));
         post.setStatus(r.status());
         if (r.publishedAt() != null) {

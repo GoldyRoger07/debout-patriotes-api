@@ -44,7 +44,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/health", "/error").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/candidates/**", "/api/posts/**", "/api/categories/**")
+                        .requestMatchers(HttpMethod.GET, "/api/candidates/**", "/api/posts/**", "/api/categories/**",
+                                "/api/albums/**", "/api/events/**")
                         .permitAll()
                         .requestMatchers("/api/admin/**", "/api/auth/**").hasAuthority("SCOPE_" + ADMIN_SCOPE)
                         .anyRequest().denyAll())

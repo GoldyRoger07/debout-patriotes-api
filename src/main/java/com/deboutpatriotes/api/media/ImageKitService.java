@@ -33,9 +33,9 @@ import com.deboutpatriotes.api.common.ConflictException;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /**
- * Client minimal de l'API ImageKit.io : la médiathèque du site. Téléversement, inventaire d'un
- * dossier — pour réutiliser une image déjà en ligne plutôt que de la téléverser deux fois — et
- * suppression.
+ * Client minimal de l'API ImageKit.io : la médiathèque du site. Téléversement (images et vidéos),
+ * inventaire d'un dossier — pour réutiliser une image déjà en ligne plutôt que de la téléverser
+ * deux fois — et suppression.
  *
  * @see <a href="https://imagekit.io/docs/api-reference/upload-file/upload-file">Upload file</a>
  * @see <a href=
@@ -56,8 +56,16 @@ public class ImageKitService {
     private static final Set<String> ALLOWED_TYPES =
             Set.of("image/jpeg", "image/png", "image/webp", "image/gif", "image/avif");
 
+    /** Vidéos lisibles par les navigateurs ; ImageKit les réencode à la volée pour la diffusion. */
+    private static final Set<String> ALLOWED_VIDEO_TYPES = Set.of("video/mp4", "video/webm", "video/quicktime");
+
+    private static final long MAX_IMAGE_SIZE = 10L * 1024 * 1024;
+
+    /** Doit rester sous {@code spring.servlet.multipart.max-file-size}. */
+    private static final long MAX_VIDEO_SIZE = 100L * 1024 * 1024;
+
     /** Sous-dossiers acceptés, pour ranger la médiathèque par usage. */
-    private static final Set<String> ALLOWED_FOLDERS = Set.of("candidats", "blog", "divers");
+    private static final Set<String> ALLOWED_FOLDERS = Set.of("candidats", "blog", "galerie", "evenements", "divers");
 
     private static final String DEFAULT_FOLDER = "divers";
 
@@ -81,11 +89,37 @@ public class ImageKitService {
         if (file.getContentType() == null || !ALLOWED_TYPES.contains(file.getContentType())) {
             throw new BadRequestException("Format non pris en charge : JPEG, PNG, WebP, GIF ou AVIF uniquement.");
         }
+        if (file.getSize() > MAX_IMAGE_SIZE) {
+            throw new BadRequestException("Image trop lourde : 10 Mo maximum.");
+        }
+        ImageKitFile uploaded = send(file, folder, "image");
+        return new UploadedImage(uploaded.fileId(), uploaded.url(), uploaded.thumbnail(), uploaded.name(),
+                uploaded.width(), uploaded.height());
+    }
+
+    public UploadedVideo uploadVideo(MultipartFile file, String folder) {
+        requireConfigured();
+        if (file.isEmpty()) {
+            throw new BadRequestException("Le fichier est vide.");
+        }
+        if (file.getContentType() == null || !ALLOWED_VIDEO_TYPES.contains(file.getContentType())) {
+            throw new BadRequestException("Format non pris en charge : MP4, WebM ou MOV uniquement.");
+        }
+        if (file.getSize() > MAX_VIDEO_SIZE) {
+            throw new BadRequestException("Vidéo trop lourde : 100 Mo maximum.");
+        }
+        ImageKitFile uploaded = send(file, folder, "video");
+        return new UploadedVideo(uploaded.fileId(), uploaded.url(), uploaded.thumbnail(), uploaded.name(),
+                uploaded.width(), uploaded.height(), uploaded.size());
+    }
+
+    /** Envoie le fichier à ImageKit, dans le sous-dossier demandé du dossier racine du site. */
+    private ImageKitFile send(MultipartFile file, String folder, String defaultName) {
         String target = normalizeFolder(folder);
 
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
         body.add("file", file.getResource());
-        body.add("fileName", sanitizeFileName(file.getOriginalFilename()));
+        body.add("fileName", sanitizeFileName(file.getOriginalFilename(), defaultName));
         body.add("folder", properties.folder() + "/" + target);
         body.add("useUniqueFileName", "true");
 
@@ -100,8 +134,7 @@ public class ImageKitService {
             if (uploaded == null) {
                 throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Réponse vide d'ImageKit.");
             }
-            return new UploadedImage(uploaded.fileId(), uploaded.url(), uploaded.thumbnail(), uploaded.name(),
-                    uploaded.width(), uploaded.height());
+            return uploaded;
         } catch (RestClientException e) {
             log.error("Échec du téléversement vers ImageKit", e);
             throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Le téléversement vers ImageKit a échoué.");
@@ -279,14 +312,19 @@ public class ImageKitService {
         return term.isEmpty() ? null : "name : \"" + term + "\"";
     }
 
-    private static String sanitizeFileName(String original) {
-        String name = original == null || original.isBlank() ? "image" : original;
+    private static String sanitizeFileName(String original, String defaultName) {
+        String name = original == null || original.isBlank() ? defaultName : original;
         name = name.replaceAll("[^A-Za-z0-9._-]", "_");
         return name.length() > 100 ? name.substring(name.length() - 100) : name;
     }
 
     public record UploadedImage(String fileId, String url, String thumbnailUrl, String name, Integer width,
             Integer height) {
+    }
+
+    /** Vidéo téléversée : {@code thumbnailUrl} est l'image extraite par ImageKit. */
+    public record UploadedVideo(String fileId, String url, String thumbnailUrl, String name, Integer width,
+            Integer height, Long size) {
     }
 
     /** Une image de la médiathèque, avec l'indication qu'un contenu s'en sert déjà. */

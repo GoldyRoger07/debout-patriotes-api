@@ -62,12 +62,16 @@ public class CandidateService {
         Candidate candidate = find(id);
         String previousPhoto = candidate.getPhotoFileId();
         String previousCover = candidate.getCoverFileId();
+        String previousVideo = candidate.getVideoFileId();
         apply(candidate, request);
         if (previousPhoto != null && !Objects.equals(previousPhoto, candidate.getPhotoFileId())) {
             imageKit.deleteAfterCommit(previousPhoto);
         }
         if (previousCover != null && !Objects.equals(previousCover, candidate.getCoverFileId())) {
             imageKit.deleteAfterCommit(previousCover);
+        }
+        if (previousVideo != null && !Objects.equals(previousVideo, candidate.getVideoFileId())) {
+            imageKit.deleteAfterCommit(previousVideo);
         }
         return toResponse(candidates.save(candidate));
     }
@@ -78,6 +82,7 @@ public class CandidateService {
         candidates.delete(candidate);
         imageKit.deleteAfterCommit(candidate.getPhotoFileId());
         imageKit.deleteAfterCommit(candidate.getCoverFileId());
+        imageKit.deleteAfterCommit(candidate.getVideoFileId());
     }
 
     /** Réordonne les candidats selon la liste d'identifiants fournie (ordre d'affichage du site). */
@@ -113,6 +118,8 @@ public class CandidateService {
         c.setCoverUrl(blankToNull(r.cover()));
         c.setCoverFileId(c.getCoverUrl() == null ? null : blankToNull(r.coverFileId()));
         c.setCoverFocus(c.getCoverUrl() == null ? null : r.coverFocus());
+        c.setVideoUrl(blankToNull(r.video()));
+        c.setVideoFileId(c.getVideoUrl() == null ? null : blankToNull(r.videoFileId()));
         c.setPosition(blankToNull(r.position()));
         c.setConstituency(blankToNull(r.constituency()));
         c.setParty(blankToNull(r.party()));
@@ -151,6 +158,7 @@ public class CandidateService {
                 c.getId(), c.getSlug(), c.getName(), c.getSubtitle(),
                 c.getPhotoUrl(), c.getPhotoFileId(), c.getPhotoFocus(),
                 c.getCoverUrl(), c.getCoverFileId(), c.getCoverFocus(),
+                c.getVideoUrl(), c.getVideoFileId(),
                 c.getPosition(), c.getConstituency(), c.getParty(), List.copyOf(c.getProfessions()),
                 c.getBirthplace(), c.getQuote(),
                 List.copyOf(c.getBio()),

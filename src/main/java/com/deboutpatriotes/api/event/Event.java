@@ -1,31 +1,31 @@
-package com.deboutpatriotes.api.blog;
+package com.deboutpatriotes.api.event;
 
 import java.time.Instant;
+
+import com.deboutpatriotes.api.media.ImageFocus;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
-import com.deboutpatriotes.api.media.ImageFocus;
-
-/** Article du blog, affiché sur `/actualites/<slug>`. Le corps est rédigé en Markdown. */
+/**
+ * Événement de l'agenda, affiché sur `/evenements` : à venir tant que sa date n'est pas passée,
+ * puis dans les événements passés — où sa vidéo sert de rediffusion.
+ */
 @Entity
-@Table(name = "post")
+@Table(name = "agenda_event")
 @Getter
 @Setter
-public class Post {
+public class Event {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,11 +37,20 @@ public class Post {
     @Column(nullable = false)
     private String title;
 
-    @Column(nullable = false, length = 600)
-    private String excerpt;
+    /** Nature de l'événement : assemblée, conférence de presse, meeting… */
+    @Column(length = 80)
+    private String kind;
 
-    @Column(nullable = false, columnDefinition = "LONGTEXT")
-    private String content;
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
+    @Column(name = "starts_at", nullable = false)
+    private Instant startsAt;
+
+    private String place;
+
+    @Column(length = 160)
+    private String city;
 
     @Column(name = "cover_url")
     private String coverUrl;
@@ -49,28 +58,19 @@ public class Post {
     @Column(name = "cover_file_id")
     private String coverFileId;
 
-    /** Cadrage de la couverture dans les emplacements du site (cartes et en-tête d'article). */
     @Enumerated(EnumType.STRING)
     @Column(name = "cover_focus", length = 20)
     private ImageFocus coverFocus;
 
-    /** Vidéo ImageKit lue en tête de l'article, la couverture lui servant d'affiche. */
+    /** Vidéo ImageKit : annonce avant l'événement, rediffusion après. */
     @Column(name = "video_url")
     private String videoUrl;
 
     @Column(name = "video_file_id")
     private String videoFileId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id")
-    private Category category;
-
-    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private PostStatus status = PostStatus.DRAFT;
-
-    @Column(name = "published_at")
-    private Instant publishedAt;
+    private boolean published = true;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;

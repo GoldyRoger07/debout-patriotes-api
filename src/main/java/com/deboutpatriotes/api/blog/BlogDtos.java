@@ -58,6 +58,9 @@ public final class BlogDtos {
             String cover,
             String coverFileId,
             ImageFocus coverFocus,
+            /** VidÃ©o ImageKit lue en tÃªte de l'article. */
+            String video,
+            String videoFileId,
             CategoryResponse category,
             PostStatus status,
             Instant publishedAt,
@@ -65,7 +68,8 @@ public final class BlogDtos {
             Instant updatedAt) {
         static PostResponse of(Post p) {
             return new PostResponse(p.getId(), p.getSlug(), p.getTitle(), p.getExcerpt(), p.getContent(),
-                    p.getCoverUrl(), p.getCoverFileId(), p.getCoverFocus(), CategoryResponse.of(p.getCategory()), p.getStatus(),
+                    p.getCoverUrl(), p.getCoverFileId(), p.getCoverFocus(), p.getVideoUrl(), p.getVideoFileId(),
+                    CategoryResponse.of(p.getCategory()), p.getStatus(),
                     p.getPublishedAt(), p.getCreatedAt(), p.getUpdatedAt());
         }
     }
@@ -79,6 +83,8 @@ public final class BlogDtos {
             @Size(max = 100) String coverFileId,
             /** Cadrage de la couverture ; vide = le cadrage par défaut de l'emplacement. */
             ImageFocus coverFocus,
+            @Size(max = 500) String video,
+            @Size(max = 100) String videoFileId,
             Long categoryId,
             @NotNull PostStatus status,
             /** Date de publication ; vide = maintenant au moment de publier. Une date future programme l'article. */

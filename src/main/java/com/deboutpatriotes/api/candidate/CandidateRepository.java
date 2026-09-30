@@ -16,8 +16,12 @@ public interface CandidateRepository extends JpaRepository<Candidate, Long> {
 
     Optional<Candidate> findBySlugAndPublishedTrue(String slug);
 
-    /** Noms des candidats dont la fiche utilise cette image (portrait ou couverture). */
-    @Query("select c.name from Candidate c where :fileId is not null and (c.photoFileId = :fileId or c.coverFileId = :fileId)")
+    /** Noms des candidats dont la fiche utilise ce fichier (portrait, couverture ou vidéo). */
+    @Query("""
+            select c.name from Candidate c
+            where :fileId is not null
+              and (c.photoFileId = :fileId or c.coverFileId = :fileId or c.videoFileId = :fileId)
+            """)
     List<String> findNamesUsingImage(@Param("fileId") String fileId);
 
     @Query("select c.photoFileId from Candidate c where c.photoFileId in :fileIds")
@@ -25,6 +29,9 @@ public interface CandidateRepository extends JpaRepository<Candidate, Long> {
 
     @Query("select c.coverFileId from Candidate c where c.coverFileId in :fileIds")
     List<String> findCoverFileIdsIn(@Param("fileIds") Collection<String> fileIds);
+
+    @Query("select c.videoFileId from Candidate c where c.videoFileId in :fileIds")
+    List<String> findVideoFileIdsIn(@Param("fileIds") Collection<String> fileIds);
 
     boolean existsBySlug(String slug);
 

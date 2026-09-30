@@ -110,6 +110,27 @@ class MediaLibraryTests {
                 .containsExactlyInAnyOrder("file-portrait", "file-couverture");
     }
 
+    /** Les vidéos partagent la médiathèque : celle d'un article ou d'une fiche est protégée. */
+    @Test
+    void aVideoIsReportedAsUsedByItsPostAndItsCandidate() {
+        Post post = post("article-video", "Discours de Jacmel", "Texte.", null);
+        post.setVideoUrl("https://ik.imagekit.io/dp/blog/discours.mp4");
+        post.setVideoFileId("file-video-article");
+        posts.save(post);
+
+        Candidate candidate = new Candidate();
+        candidate.setSlug("marie-louise");
+        candidate.setName("Marie Louise");
+        candidate.setVideoUrl("https://ik.imagekit.io/dp/candidats/presentation.mp4");
+        candidate.setVideoFileId("file-video-fiche");
+        candidates.save(candidate);
+
+        assertThat(usedBy("file-video-article", null)).contains("Discours de Jacmel");
+        assertThat(usedBy("file-video-fiche", null)).contains("Marie Louise");
+        assertThat(referenced(Set.of("file-video-article", "file-video-fiche", "file-libre")))
+                .containsExactlyInAnyOrder("file-video-article", "file-video-fiche");
+    }
+
     @Test
     void anImageNobodyUsesIsFreeToDelete() {
         assertThat(usedBy("file-orphelin", "https://ik.imagekit.io/dp/divers/orphelin.jpg")).isNull();

@@ -39,7 +39,7 @@ public class ApiExceptionHandler {
 
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     ProblemDetail tooLarge(MaxUploadSizeExceededException e) {
-        return ProblemDetail.forStatusAndDetail(HttpStatus.CONTENT_TOO_LARGE, "Fichier trop volumineux (10 Mo maximum).");
+        return ProblemDetail.forStatusAndDetail(HttpStatus.CONTENT_TOO_LARGE, "Fichier trop volumineux (100 Mo maximum pour une vidéo).");
     }
 
     /** Erreurs de validation : le détail par champ est exposé dans `errors`. */

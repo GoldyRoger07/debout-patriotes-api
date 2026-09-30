@@ -73,6 +73,14 @@ public class Candidate {
     @Column(name = "cover_focus", length = 20)
     private ImageFocus coverFocus;
 
+    /** Vidéo ImageKit présentée sur la fiche (section « En vidéo »). */
+    @Column(name = "video_url")
+    private String videoUrl;
+
+    /** Identifiant ImageKit de la vidéo, pour la supprimer quand elle est remplacée. */
+    @Column(name = "video_file_id")
+    private String videoFileId;
+
     /** Poste brigué. */
     private String position;
 

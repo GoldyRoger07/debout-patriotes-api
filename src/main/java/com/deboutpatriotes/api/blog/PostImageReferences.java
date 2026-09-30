@@ -1,6 +1,7 @@
 package com.deboutpatriotes.api.blog;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -8,7 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.deboutpatriotes.api.media.ImageReferences;
 
-/** Images utilisées par les articles : image de couverture et images insérées dans le corps. */
+/** Fichiers utilisés par les articles : couverture, vidéo et images insérées dans le corps. */
 @Component
 class PostImageReferences implements ImageReferences {
 
@@ -26,6 +27,11 @@ class PostImageReferences implements ImageReferences {
 
     @Override
     public Set<String> referenced(Collection<String> fileIds) {
-        return fileIds.isEmpty() ? Set.of() : Set.copyOf(posts.findCoverFileIdsIn(fileIds));
+        if (fileIds.isEmpty()) {
+            return Set.of();
+        }
+        Set<String> used = new HashSet<>(posts.findCoverFileIdsIn(fileIds));
+        used.addAll(posts.findVideoFileIdsIn(fileIds));
+        return used;
     }
 }

@@ -54,6 +54,8 @@ public final class CandidateDtos {
             String cover,
             String coverFileId,
             ImageFocus coverFocus,
+            String video,
+            String videoFileId,
             String position,
             String constituency,
             String party,
@@ -85,6 +87,9 @@ public final class CandidateDtos {
             @Size(max = 100) String coverFileId,
             /** Cadrage de la couverture ; vide = le cadrage par défaut de l'emplacement. */
             ImageFocus coverFocus,
+            /** Vidéo ImageKit de la fiche ; vide = pas de section vidéo. */
+            @Size(max = 500) String video,
+            @Size(max = 100) String videoFileId,
             @Size(max = 160) String position,
             @Size(max = 160) String constituency,
             @Size(max = 160) String party,
